@@ -3,6 +3,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+import torch
 
 DEFULT_PATH = os.getcwd()
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
@@ -31,12 +32,14 @@ class BrainTumorDataset(Dataset):
         # The distribution of the data points among classes in the dataset:
         self.data_distribution = self.get_data_distribution()
 
+
     def get_classes(self):
         classes = {}
         for i, class_ in enumerate(os.listdir(self.dataset_path)):
             classes[class_] = i
         
         return classes
+    
     
     def load_dataset_paths(self):
         data_labels = []; data_labels_txt = []; data_paths = []
@@ -81,7 +84,8 @@ class BrainTumorDataset(Dataset):
         
         image_label = self.data_labels[index]
         image_label_txt = self.data_labels_txt[index]
-        
+        image = torch.tensor(image).float()
+        image = torch.permute(image, (2, 0, 1))
         return image, image_label, image_label_txt
         
     

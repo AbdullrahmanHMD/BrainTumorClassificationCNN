@@ -2,11 +2,13 @@ from bt_dataset import *
 import cv2
 
 
+import os
 
-dataset = BrainTumorDataset()
 
-image = dataset[0][0]
+# dataset = BrainTumorDataset(dataset_path=dataset_path)
 
-cv2.imshow("Image", image)
+# image = dataset[0][0]
 
-cv2.waitKey(0)
+# cv2.imshow("Image", image)
+
+# cv2.waitKey(0)
