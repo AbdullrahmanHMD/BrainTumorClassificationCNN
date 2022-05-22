@@ -4,34 +4,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 import torch
+from data.preprocessing import *
 
 DEFULT_PATH = os.getcwd()
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 class BrainTumorDataset(Dataset):
     
-    def __init__(self, dataset_path=DEFULT_PATH, test=False):
+    def __init__(self, dataset_path=DEFULT_PATH, test=False, preprocessing=[]):
         
         if test:
             dataset_type = 'Testing'
         else:
             dataset_type = 'Training'
         
+        self.preprocessing = preprocessing
+        
         self.dataset_path = os.path.join(dataset_path, dataset_type)
         
-        # Dataset general specification:
+        # --- Dataset general specification -----------------------
+        self.image_size = 512
         
         # The labels of the classes in the dataset:
         self.classes = os.listdir(self.dataset_path)
+        self.num_classes = len(self.classes)
+        
         # The labels of the classes in the dataset mapped to integers:
         self.mapped_classes = self.get_classes()
         
+        # ----------------------------------------------------------
         # Loading data paths and its labels:
         self.data_paths, self.data_labels, self.data_labels_txt = self.load_dataset_paths()
         
         # The distribution of the data points among classes in the dataset:
         self.data_distribution = self.get_data_distribution()
-
+        
+        # ----------------------------------------------------------
+        # Class weights for the weighted loss:
+        self.class_weights = self.calculate_class_weights()
 
     def get_classes(self):
         classes = {}
@@ -77,6 +87,14 @@ class BrainTumorDataset(Dataset):
         
         plt.show()
     
+    def calculate_class_weights(self):
+        
+        bin_count = np.bincount(self.data_labels)
+        dataset_size = len(self.data_labels)
+        
+        class_weights = [1 - (class_/dataset_size) for class_ in bin_count]
+        
+        return class_weights
     
     def __getitem__(self, index):
         image_path = self.data_paths[index]
@@ -84,8 +102,12 @@ class BrainTumorDataset(Dataset):
         
         image_label = self.data_labels[index]
         image_label_txt = self.data_labels_txt[index]
+        if len(self.preprocessing) > 0:
+            image = sequential_preprocessing(image=image, preprocessing_ops=self.preprocessing)
+
         image = torch.tensor(image).float()
         image = torch.permute(image, (2, 0, 1))
+        
         return image, image_label, image_label_txt
         
     
