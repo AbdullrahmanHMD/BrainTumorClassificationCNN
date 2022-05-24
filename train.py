@@ -3,7 +3,7 @@ from tqdm import tqdm
 import time
 from evaluate import evaluate
 
-def train(model, train_loader, test_loader, optimizer, criterion, epochs):
+def train(model, train_loader, test_loader, optimizer, criterion, epochs, scheduler=None):
     
     epoch_times = []
     total_loss = []    
@@ -12,6 +12,7 @@ def train(model, train_loader, test_loader, optimizer, criterion, epochs):
     accuracies_test = []
     accuracies_train = []
     device = get_device()
+    model = model.to(device)
     
     for epoch in range(epochs):
         epoch_loss = 0
@@ -20,8 +21,8 @@ def train(model, train_loader, test_loader, optimizer, criterion, epochs):
             
             optimizer.zero_grad()
             
-            x.to(device)
-            y.to(device)
+            x = x.to(device)
+            y = y.to(device)
             
             yhat = model(x)
             
@@ -34,6 +35,11 @@ def train(model, train_loader, test_loader, optimizer, criterion, epochs):
         test_accuracy = evaluate(model, test_loader)
         train_accuracy = evaluate(model, train_loader)
 
+        if scheduler != None:
+            lr = optimizer.param_groups[0]['lr']
+            print(f'Learning rate: {lr}')
+            scheduler.step()
+        
         accuracies_test.append(test_accuracy)
         accuracies_train.append(train_accuracy)
 

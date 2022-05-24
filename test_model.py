@@ -1,5 +1,5 @@
 from data.bt_dataset import BrainTumorDataset
-from model import BrainTumorCNN
+from model2 import BrainTumorCNN
 from torch.utils.data import DataLoader
 import torchvision
 import torch
@@ -25,25 +25,11 @@ datum = dataset[0][0]
 
 curr_images = []
 
-print(datum.shape)
 model = BrainTumorCNN()
-i = 0
+
+# i = 0
 for x, y, y_txt in train_loader:
     
-    print(x.shape)
-    
-    # try:
-    # except Exception:
-        # curr_images.append(list(x.shape[2:]))
-        # print(dataset.data_paths[i])
-        # print(x.shape)
-    # i += 1
+    yhat = model(x)
 
-# print(curr_images)
-
-# with open('image_sizes.txt', 'w') as file:
-    # for size in curr_images:
-        # file.write(str(size[0]) + " " + str(size[1]))
-        # file.write('\n')
-# print(model(datum))
-# print(datum.shape)
+    break
