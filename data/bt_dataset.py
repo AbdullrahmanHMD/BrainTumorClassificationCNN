@@ -96,6 +96,12 @@ class BrainTumorDataset(Dataset):
         
         return class_weights
     
+    def class_indicies_distribution(self):
+        indicies_distribution = {}
+        for class_ in self.mapped_classes:
+            class_mask = self.data_labels == class_
+            indicies_distribution[class_] = self.mapped_classes[class_mask]
+
     def __getitem__(self, index):
         image_path = self.data_paths[index]
         image = cv2.imread(image_path)
