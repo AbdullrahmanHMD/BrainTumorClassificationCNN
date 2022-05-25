@@ -3,6 +3,9 @@ from torch.nn import *
 import torch
 import torch.nn as nn
 
+# Weight decy = 2e-5
+# lr = 1e-4
+# epochs 50
 
 class BrainTumorCNN(torch.nn.Module):
     def __init__(self, number_of_classes=4, in_channel=3, image_size=256, drop_out_prob=0.5):

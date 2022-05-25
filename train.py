@@ -32,6 +32,7 @@ def train(model, train_loader, test_loader, optimizer, criterion, epochs, schedu
             loss.backward()
             optimizer.step()
         
+        print('Evaluating epoch...', flush=False)
         test_accuracy = evaluate(model, test_loader)
         train_accuracy = evaluate(model, train_loader)
 
@@ -43,12 +44,12 @@ def train(model, train_loader, test_loader, optimizer, criterion, epochs, schedu
         accuracies_test.append(test_accuracy)
         accuracies_train.append(train_accuracy)
 
-        print(f'Epoch: {epoch} | Loss: {epoch_loss:.2f}')
+        print(f'Epoch: {epoch} | Loss: {epoch_loss:.2f}', flush=False)
         total_loss.append(epoch_loss)
         
         epoch_toc = time.time()
         epoch_time = epoch_toc - epoch_tic
-        print(f'Epoch: {epoch} took: {epoch_time:.2f} seconds')
+        print(f'Epoch: {epoch} took: {epoch_time:.2f} seconds', flush=False)
         epoch_times.append(epoch_time)
     
     return total_loss, epoch_times, accuracies_train, accuracies_test
