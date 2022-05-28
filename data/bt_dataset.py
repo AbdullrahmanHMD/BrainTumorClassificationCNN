@@ -11,7 +11,7 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 class BrainTumorDataset(Dataset):
     
-    def __init__(self, dataset_path=DEFULT_PATH, test=False, preprocessing=[]):
+    def __init__(self, dataset_path=DEFULT_PATH, test=False, preprocessing=None):
         
         if test:
             dataset_type = 'Testing'
@@ -63,10 +63,9 @@ class BrainTumorDataset(Dataset):
                 data_labels_txt.append(label_txt)
                 data_paths.append(datum_path)
         
-        return data_paths, data_labels, data_labels_txt
+        return data_paths, np.array(data_labels), np.array(data_labels_txt)
                 
-            
-            
+               
     def get_data_distribution(self):
         data_distribution = np.bincount(self.data_labels)
         
@@ -92,15 +91,18 @@ class BrainTumorDataset(Dataset):
         bin_count = np.bincount(self.data_labels)
         dataset_size = len(self.data_labels)
         
-        class_weights = [1 - (class_/dataset_size) for class_ in bin_count]
+        class_weights = [1 - (class_ / dataset_size) for class_ in bin_count]
         
         return class_weights
-    
+
+
     def class_indicies_distribution(self):
         indicies_distribution = {}
-        for class_ in self.mapped_classes:
-            class_mask = self.data_labels == class_
-            indicies_distribution[class_] = self.mapped_classes[class_mask]
+        for class_ in self.mapped_classes.values():
+            mask = class_ == self.data_labels
+            indicies_distribution[class_] = [i for i, x in enumerate(mask) if x]
+        return indicies_distribution
+
 
     def __getitem__(self, index):
         image_path = self.data_paths[index]
@@ -108,12 +110,11 @@ class BrainTumorDataset(Dataset):
         
         image_label = self.data_labels[index]
         image_label_txt = self.data_labels_txt[index]
-        if len(self.preprocessing) > 0:
-            image = sequential_preprocessing(image=image, preprocessing_ops=self.preprocessing)
+        if self.preprocessing != None:
+            image = self.preprocessing(image)
+        else:
+             image = torch.tensor(image)
 
-        image = torch.tensor(image).float()
-        image = torch.permute(image, (2, 0, 1))
-        
         return image, image_label, image_label_txt
         
     

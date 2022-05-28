@@ -14,7 +14,7 @@ class BrainTumorCNN(torch.nn.Module):
         # --- First layer ----------------------------------------------------------
         # ==========================================================================
         
-        kernel_size, stride, padding = 3, 2, 0 # 3, 1, 1
+        kernel_size, stride, padding = 3, 2, 1 # 3, 1, 1
         out_channels_1 = 32 # 32
         
         self.conv_1 = nn.Conv2d(in_channels=in_channel, out_channels=out_channels_1,
@@ -32,14 +32,14 @@ class BrainTumorCNN(torch.nn.Module):
         
         self.batch_norm_1 = nn.BatchNorm2d(num_features=out_channels_1)
         
-        self.dropout_1 = nn.Dropout(p=drop_out_prob)
+        self.dropout_1 = nn.Dropout(p=0.6)
         
         # ==========================================================================
         # --- Second layer ---------------------------------------------------------
         # ==========================================================================
         
-        kernel_size, stride, padding = 3, 2, 2 # 3, 1, 1
-        out_channels_2 = 64
+        kernel_size, stride, padding = 3, 2, 1 # 3, 1, 1
+        out_channels_2 = 45
         
         self.conv_2 = nn.Conv2d(in_channels=out_channels_1, out_channels=out_channels_2,
                                 kernel_size=kernel_size, stride=stride, padding=padding)
@@ -64,13 +64,13 @@ class BrainTumorCNN(torch.nn.Module):
         # ==========================================================================
         
         kernel_size, stride, padding = 3, 1, 1
-        out_channels_3 = 128
+        out_channels_3 = 64
         
         self.conv_3 = nn.Conv2d(in_channels=out_channels_2, out_channels=out_channels_3,
                                 kernel_size=kernel_size, stride=stride, padding=padding)
         
         self.batch_norm_3 = nn.BatchNorm2d(num_features=out_channels_3)
-        self.dropout_3 = nn.Dropout(p=drop_out_prob)
+        self.dropout_3 = nn.Dropout(p=0.75)
         
         # --- Feature map size after 3rd convolution:
         final_image_size = feature_map_size(final_image_size, kernel_size=kernel_size,
@@ -94,13 +94,12 @@ class BrainTumorCNN(torch.nn.Module):
         final_image_size = feature_map_size(final_image_size, kernel_size=kernel_size,
                                             stride=stride, padding=padding)
         
-                                            
         # ==========================================================================
         # --- Fifth layer ---------------------------------------------------------
         # ==========================================================================
         
-        kernel_size, stride, padding = 3, 1, 1
-        out_channels_5 = 128 
+        kernel_size, stride, padding = 5, 1, 1
+        out_channels_5 = 256 
         
         self.conv_5 = nn.Conv2d(in_channels=out_channels_4, out_channels=out_channels_5,
                                 kernel_size=kernel_size, stride=stride, padding=padding)
@@ -112,7 +111,7 @@ class BrainTumorCNN(torch.nn.Module):
         final_image_size = feature_map_size(final_image_size, kernel_size=kernel_size,
                                             stride=stride, padding=padding)
         
-        kernel_size, stride = 3, 2
+        kernel_size, stride = 3, 3
         self.max_pooling_3 = nn.MaxPool2d(kernel_size=kernel_size, stride=stride)
         
         # --- Feature map size after 2nd pooling:
@@ -121,10 +120,10 @@ class BrainTumorCNN(torch.nn.Module):
                                             
         # --- Fully Connected layer ------------------------------------------------
         
-        in_features = final_image_size ** 2 * out_channels_5 
+        in_features = final_image_size ** 2 * out_channels_5  # out_channels_5
         
-        self.fc_1 = nn.Linear(in_features=in_features, out_features=in_features)
-        self.fc_2 = nn.Linear(in_features=in_features, out_features=number_of_classes)
+        self.fc_1 = nn.Linear(in_features=in_features, out_features=1024)
+        self.fc_2 = nn.Linear(in_features=1024, out_features=number_of_classes)
         # self.fc_3 = nn.Linear(in_features=1000, out_features=number_of_classes)
         
         # --- Weight initialization ------------------------------------------------
@@ -188,13 +187,13 @@ class BrainTumorCNN(torch.nn.Module):
         x = self.dropout_5(x)
         
         # --- Fully Connected layer -------------------------------------------------
-
+        
         x = x.view(x.size(0), -1)
 
         x = self.fc_1(x)
         x = self.fc_2(x)
         # x = self.fc_3(x)
-        
+
         return x
         
         
