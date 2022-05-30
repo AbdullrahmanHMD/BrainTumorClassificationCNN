@@ -6,24 +6,19 @@ import cv2
 import torch
 from data.preprocessing import *
 
-DEFULT_PATH = os.getcwd()
+DEFULT_PATH = os.path.join(os.getcwd(), 'dataset')
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 class BrainTumorDataset(Dataset):
     
-    def __init__(self, dataset_path=DEFULT_PATH, test=False, preprocessing=None):
-        
-        if test:
-            dataset_type = 'Testing'
-        else:
-            dataset_type = 'Training'
-        
+    def __init__(self, dataset_path=DEFULT_PATH, preprocessing=None):
+                
         self.preprocessing = preprocessing
         
-        self.dataset_path = os.path.join(dataset_path, dataset_type)
+        self.dataset_path = dataset_path
         
         # --- Dataset general specification -----------------------
-        self.image_size = 512
+        self.image_size = 256
         
         # The labels of the classes in the dataset:
         self.classes = os.listdir(self.dataset_path)
